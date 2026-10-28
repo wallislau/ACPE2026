@@ -82,7 +82,7 @@
     <div class="phone-wrap"><div class="phone-frame"><div class="phone-status">●●●  5G <span>17:12</span></div><div class="phone-heading">Messages · Lead Pharmacoepidemiologist</div><div class="sms">I'm off</div><div class="sms delayed">to get a coffee <small>Delivered just now</small></div><div class="sms delayed">will be back <small>Delivered just now</small></div></div><p class="phone-explanation">The internet connection dropped on the way to the coffee shop, so only “I'm off” got through. The two follow-up messages were delayed until the phone reconnected.</p></div>
     <p><strong>New to sequential nested trials?</strong> That's exactly where you're meant to start. You have just made the key design decisions, one trial at a time.</p>
     <div class="protocol-grid" id="finalProtocol"></div>
-    <div class="btn-row"><button class="btn primary" id="printProtocol" type="button">Print recovered protocol</button><button class="btn" id="playAgain" type="button">Play again</button></div>
+    <div class="btn-row"><button class="btn" id="playAgain" type="button">Play again</button></div>
   </section>
   <footer class="footer">ACPE 2026 Educational session · 30 Oct 2026. Educational simulation only: all patient records, dates and scenarios are fictional and simplified; they are not real clinical data or a substitute for a complete study protocol.</footer>
 </main>
@@ -141,7 +141,7 @@ function toggleTimer(){if(state.running){stopTimer();$('timerBtn').textContent='
 document.querySelectorAll('button[data-id]').forEach(b=>b.addEventListener('click',()=>openObject(b.dataset.id)));
 $('openLaptop').addEventListener('click',()=>openObject('laptop'));
 $('closeDialog').addEventListener('click',()=>$('caseDialog').close());
-$('playAgain').addEventListener('click',restart);$('restartScene').addEventListener('click',restart);$('timerBtn').addEventListener('click',toggleTimer);$('printProtocol').addEventListener('click',()=>window.print());
+$('playAgain').addEventListener('click',restart);$('restartScene').addEventListener('click',restart);$('timerBtn').addEventListener('click',toggleTimer);
 $('caseDialog').addEventListener('click',evt=>{if(evt.target===$('caseDialog'))$('caseDialog').close();});
 renderProgress();renderTimer();
 })();
