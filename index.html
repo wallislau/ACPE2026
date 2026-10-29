@@ -27,13 +27,13 @@
 .readonly-label{margin:12px 0;padding:10px 12px;background:#163f3b;border:1px solid #70baa4;color:#d8fff0;border-radius:9px;font-size:.88rem}
 .choice:disabled[aria-pressed="true"]{opacity:1;border-color:var(--mint);background:#275447;color:#effff6}
 .choice:disabled:not([aria-pressed="true"]){opacity:.62}
-/* Patient eligibility grid (one cabinet, three trials) */
+/* Patient eligibility grid (one cabinet, two trials) */
 .patient-record-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0 17px}
 .patient-record-grid .patient{cursor:default;min-height:104px}
 .patient-record-grid .patient .facts{font-size:.86rem;line-height:1.4}
 .patient-record-grid .patient .name{color:#b4f1da}
 .patient-grid-scroll{max-width:100%;overflow-x:auto;border-radius:10px;border:1px solid #536e82;background:#12253a;margin:9px 0 13px}
-.patient-grid{border-collapse:separate;border-spacing:5px;width:100%;min-width:460px}
+.patient-grid{border-collapse:separate;border-spacing:5px;width:100%;min-width:330px}
 .patient-grid th,.patient-grid td{text-align:center;padding:8px 7px;border:1px solid #49667b;border-radius:7px;background:#1d364f}
 .patient-grid th{font-size:.83rem;font-weight:760}
 .patient-grid th:first-child,.patient-grid td:first-child{width:102px;min-width:102px;text-align:left;background:#233f55}
@@ -133,7 +133,7 @@ const ids=['whiteboard','calendar','cabinet','desk','phone'];
 const info={
 whiteboard:{short:'Study design',label:'Sequential nested trials',where:'Whiteboard',title:'The whiteboard: a design dilemma',paper:'The next treatment decision will not wait around. Once prescribed, antipsychotics can usually be collected the same day. At each monthly review, eligible children may initiate treatment or remain untreated. We want to compare initiation versus non-initiation at these repeated decision points.',question:'Which study design best fits this simplified question?',answers:[['sccs','Self-controlled case series'],['ccw','Clone–censor–weight with an extended initiation grace period'],['seq','Sequential nested trial emulation'],['cross','A one-off cross-sectional snapshot']],correct:'seq',why:'At each review, a new trial can be formed among eligible children. Initiation is expected promptly, so repeated nested trials are a good fit for these treatment decisions. The precise design still depends on the causal question and data.'},
 calendar:{short:'Trial interval',label:'30 days (monthly)',where:'Calendar',title:'The calendar: when do we repeat?',paper:'Lucky us: this database is regularly updated and can follow children for 5–10 years. The clinic assesses whether a child starts antipsychotics at each monthly review. We need a new eligibility check at every review.',question:'How far apart should the nested trials be in this exercise?',answers:[['7','Every 7 days'],['30','Every 30 days'],['180','Every 180 days'],['365','Every 365 days']],correct:'30',why:'A 30-day interval is the operational approximation to the monthly review schedule in this teaching exercise. In practice, calendar months vary in length, and the interval should fit actual clinical decision-making and data resolution.'},
-cabinet:{short:'Patient eligibility',label:'A: T1 · B/C: T1–3 · D: T2–3',where:'Filing cabinet',title:'The filing cabinet: patient eligibility across trials',paper:'The first trial started on 1 January 2018. A new trial starts every 30 days. A child can enter at a trial start if they are under observation, meet the study eligibility criteria, have not previously initiated antipsychotics, and have not yet developed type 2 diabetes.',question:'Which trials can each patient enter?',why:'Patient A: Trial 1 only. Patients B and C: Trials 1, 2 and 3. Patient D: Trials 2 and 3, initiating treatment at the start of Trial 3 on 2 March 2018. Eligibility must be reassessed at each trial start.'},
+cabinet:{short:'Patient eligibility',label:'A: T1 · B/C: T1–2 · D: T2',where:'Filing cabinet',title:'The filing cabinet: patient eligibility across trials',paper:'The first trial started on 1 January 2018. A new trial starts every 30 days. A child can enter at a trial start if they are under observation, meet the study eligibility criteria, have not previously initiated antipsychotics, and have not yet developed type 2 diabetes.',question:'Which trials can each patient enter?',why:'Patient A: Trial 1 only. Patients B and C: Trials 1 and 2. Patient D: Trial 2 only, initiating antipsychotics on the Trial 2 start date (31 January 2018). Eligibility is reassessed at every trial start.'},
 desk:{short:'Outcome follow-up',label:'Up to 5–10 years available',where:'Desk memo',title:'The desk note: the diabetes clock',paper:'Type 2 diabetes can take years to develop. A short follow-up might miss clinically important events. Our data may cover 5–10 years per child — but a child can be lost to follow-up, develop diabetes, die, or reach the end of available records earlier.',question:'Which outcome measurement approach best suits the question?',answers:[['30','Count diabetes only within 30 days of starting each trial'],['90','Stop everyone at 90 days to keep the spreadsheet tidy'],['long','Follow each patient as long as possible until they develop diabetes, die, or reach the end of administrative follow-up. Report cumulative incidence differences at meaningful time points (e.g., 1, 5, and 10 years), where data permit.'],['forever','Follow everyone indefinitely even beyond available records']],correct:'long',why:'For a long-latency outcome, prespecify an appropriate long-term horizon and use the follow-up actually observed (potentially 5–10 years here), with appropriate censoring for incomplete observation.'},
 phone:{short:'Pooling & 95% CIs',label:'Pool trials; participant-level bootstrap',where:'Telephone',title:'The telephone: a message from the analyst',paper:'“We can analyse the pooled individual-level data across nested trials. But hold on: one child may contribute to several trials. Those records are not independent. How do we construct a 95% confidence interval that respects repeat contributions?”',question:'What is the best analysis plan among these options?',answers:[['naive','Pool the records and calculate an ordinary CI as if every patient-trial row were unrelated'],['rows','Bootstrap individual patient-trial rows independently'],['person','Pool the nested-trial data and bootstrap at the patient level, keeping each sampled patient’s trial records together'],['last','Keep only the last trial each child entered, so confidence intervals are unnecessary']],correct:'person',why:'A pooled individual-level analysis can use participant-level (cluster) bootstrapping to construct confidence intervals: resample patients, keeping all their repeated trial contributions together, refit the analysis and use the bootstrap distribution. Bootstrapping addresses uncertainty from within-person dependence; confounding still needs its own handling.'}
 };
@@ -142,9 +142,9 @@ const patients=[
 {id:'A',text:'Observed and eligible on 1 January 2018. Initiates antipsychotics on 15 January 2018.'},
 {id:'B',text:'Observed and eligible from 1 January 2018. Remains untreated and free of diabetes through May 2025.'},
 {id:'C',text:'Observed and eligible on 1 January 2018. Develops type 2 diabetes on 30 May 2021.'},
-{id:'D',text:'Enters observation and meets eligibility criteria on 20 January 2018. Remains untreated until 2 March 2018, when antipsychotics are initiated.'}
+{id:'D',text:'Enters observation and meets eligibility criteria on 20 January 2018. Remains untreated until 31 January 2018, when antipsychotics are initiated.'}
 ];
-const expectedTrials={A:[1],B:[1,2,3],C:[1,2,3],D:[2,3]};
+const expectedTrials={A:[1],B:[1,2],C:[1,2],D:[2]};
 const state={solved:new Set(),choice:{},patient:new Set(),grid:{},current:null,feedback:'',hint:false,time:900,running:false,interval:null};
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function status(message,type=''){ $('status').innerHTML='<div class="notice '+type+'">'+message+'</div>';}
@@ -193,8 +193,8 @@ function renderQuestion(){
    html+='<div class="patient-record-grid" aria-label="Four fictional patient records">'+patients.map(p=>'<article class="patient"><img class="portrait-img" alt="Portrait of fictional Patient '+p.id+'" src="'+portraitImages[p.id]+'"><span><span class="name">Patient '+p.id+'</span><span class="facts" style="display:block">'+esc(p.text)+'</span></span></article>').join('')+'</div>';
    html+='<div class="question-title">'+esc(d.question)+'</div>';
    html+='<p class="patient-grid-note">Tick all trials each patient can enter. These are trial-start dates. A patient\'s eligibility is assessed again at every trial start.</p>';
-   html+='<div class="patient-grid-scroll" tabindex="0" aria-label="Patient by trial eligibility grid, scroll horizontally if needed"><table class="patient-grid"><thead><tr><th scope="col">Patient</th><th scope="col">Trial 1<br>1 Jan 2018</th><th scope="col">Trial 2<br>31 Jan 2018</th><th scope="col">Trial 3<br>2 Mar 2018</th></tr></thead><tbody>';
-   for(const p of patients){html+='<tr><th scope="row">Patient '+p.id+'</th>';for(const t of [1,2,3]){const key=p.id+'-'+t;html+='<td><input type="checkbox" data-cell="'+key+'" aria-label="Patient '+p.id+', Trial '+t+'" '+(state.grid[key]?'checked':'')+' '+(done?'disabled':'')+'></td>';}html+='</tr>';}
+   html+='<div class="patient-grid-scroll" tabindex="0" aria-label="Patient by trial eligibility grid, scroll horizontally if needed"><table class="patient-grid"><thead><tr><th scope="col">Patient</th><th scope="col">Trial 1<br>1 Jan 2018</th><th scope="col">Trial 2<br>31 Jan 2018</th></tr></thead><tbody>';
+   for(const p of patients){html+='<tr><th scope="row">Patient '+p.id+'</th>';for(const t of [1,2]){const key=p.id+'-'+t;html+='<td><input type="checkbox" data-cell="'+key+'" aria-label="Patient '+p.id+', Trial '+t+'" '+(state.grid[key]?'checked':'')+' '+(done?'disabled':'')+'></td>';}html+='</tr>';}
    html+='</tbody></table></div>';
  } else {
    html+='<div class="question-title">'+esc(d.question)+'</div><div class="choices">'+d.answers.map(([val,label],i)=>'<button type="button" class="choice" data-answer="'+val+'" aria-pressed="'+(state.choice[id]===val)+'" '+(done?'disabled':'')+'><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(label)+'</span></button>').join('')+'</div>';
@@ -220,7 +220,7 @@ function checkAnswer(){
  let correct=false;
  if(id==='cabinet'){
    let mismatches=0;
-   for(const p of patients)for(const t of [1,2,3]){
+   for(const p of patients)for(const t of [1,2]){
      const key=p.id+'-'+t;
      if(Boolean(state.grid[key])!==expectedTrials[p.id].includes(t))mismatches++;
    }
